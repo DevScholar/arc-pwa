@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ArcPWA – Basic Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    header {
+      max-width: 800px;
+      margin: 0 auto 2rem;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      color: #1e293b;
+    }
+
+    header p {
+      color: #64748b;
+      margin-top: .4rem;
+      font-size: .95rem;
+    }
+
+    .card {
+      max-width: 800px;
+      margin: 0 auto 2rem;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    }
+
+    .card-header {
+      padding: .75rem 1.25rem;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .card-header code {
+      background: #334155;
+      padding: .15rem .5rem;
+      border-radius: 4px;
+      font-size: .8rem;
+    }
+
+    arc-pwa {
+      display: block;
+      width: 100%;
+      height: 380px;
+    }
+
+    .log {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      font-size: .85rem;
+      color: #475569;
+    }
+
+    .log h2 { font-size: .9rem; color: #1e293b; margin-bottom: .5rem; }
+
+    #log-entries { font-family: monospace; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>@devscholar/arc-pwa — Basic Demo</h1>
+  <p>A counter PWA loaded directly from <strong>counter.pwa.zip</strong> via Service Worker.</p>
+</header>
+
+<div class="card">
+  <div class="card-header">
+    <span>📦</span>
+    <code>archive="counter.pwa.zip"</code>
+    <span>src="index.html"</span>
+  </div>
+  <arc-pwa archive="counter.pwa.zip" src="index.html"></arc-pwa>
+</div>
+
+<div class="log">
+  <h2>Console</h2>
+  <div id="log-entries">Loading…</div>
+</div>
+
+<script type="module">
+  import '/src/index.ts';
+
+  const logEl = document.getElementById('log-entries');
+  function log(msg) {
+    const now = new Date().toISOString().slice(11, 23);
+    logEl.textContent += `[${now}] ${msg}\n`;
+  }
+
+  const pwa = document.querySelector('arc-pwa');
+
+  pwa.addEventListener('load', async () => {
+    log('load fired');
+
+    const fs = pwa.fs;
+    log(`Files in archive: ${fs.listFiles().join(', ')}`);
+
+    const html = await fs.readFile('/index.html', 'utf-8');
+    log(`index.html size: ${html.length} chars`);
+  });
+
+  pwa.addEventListener('error', (e) => {
+    log(`ERROR: ${e.message}`);
+  });
+
+  logEl.textContent = '';
+  log('Page loaded, waiting for arc-pwa...');
+</script>
+
+</body>
+</html>

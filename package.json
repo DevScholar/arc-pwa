@@ -1,0 +1,39 @@
+{
+  "name": "@devscholar/arc-pwa",
+  "version": "0.0.1",
+  "description": "Run PWAs from ZIP archives in the browser via a custom element",
+  "type": "module",
+  "module": "./dist/arc-pwa.js",
+  "types": "./dist/arc-pwa.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "sideEffects": true,
+  "exports": {
+    ".": {
+      "import": "./dist/arc-pwa.js",
+      "types": "./dist/arc-pwa.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit && tsc --noEmit --project tsconfig.sw.json"
+  },
+  "keywords": [
+    "pwa",
+    "zip",
+    "web-components",
+    "custom-elements",
+    "service-worker"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}
