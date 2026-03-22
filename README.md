@@ -2,7 +2,7 @@
 
 ⚠️ This project is in Pre-Alpha stage. Except breaking changes.
 
-ArcPWA (short for Archivable PWA)— Run a PWA directly from a ZIP archive — modern alternative to Web Bundles.
+ArcPWA (short for Archivable PWA) runs a PWA directly from a ZIP archive, serving as a modern alternative to Web Bundles.
 
 ```html
 <arc-pwa archive="my-app.pwa.zip" src="index.html" style="width:100%;height:600px"></arc-pwa>
