@@ -95,8 +95,7 @@ Multiple `<arc-pwa>` elements can run simultaneously — each has its own `insta
 
 ## Browser extension (planned)
 
-A future extension built with [wxt](https://wxt.dev) will let users open `.pwa.zip` files directly from the browser without a host page.
-
+See [arc-pwa-ext](https://github.com/DevScholar/arc-pwa-ext) for details.
 ## License
 
 MIT
