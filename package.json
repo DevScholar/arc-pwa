@@ -1,6 +1,6 @@
 {
   "name": "@devscholar/arc-pwa",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Run PWAs from ZIP archives in the browser via a custom element",
   "type": "module",
   "module": "./dist/arc-pwa.js",
