@@ -25,6 +25,7 @@ const counterHtml = /* html */`<!DOCTYPE html>
 <body>
   <div class="app">
     <h1>Counter</h1>
+    <img src="clock.svg" alt="clock" style="display:block;margin:0 auto .5rem" />
     <p id="count" class="count">0</p>
     <div class="buttons">
       <button id="dec">−</button>
@@ -162,11 +163,28 @@ const historyHtml = /* html */`<!DOCTYPE html>
 </html>
 `;
 
+const clockSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="46" fill="#fff" stroke="#2563eb" stroke-width="4"/>
+  <circle cx="50" cy="50" r="3" fill="#1e293b"/>
+  <!-- hour marks -->
+  <line x1="50" y1="10" x2="50" y2="18" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="82" x2="50" y2="90" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+  <line x1="10" y1="50" x2="18" y2="50" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+  <line x1="82" y1="50" x2="90" y2="50" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+  <!-- hour hand (pointing ~10 o'clock) -->
+  <line x1="50" y1="50" x2="30" y2="28" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+  <!-- minute hand (pointing ~2 o'clock) -->
+  <line x1="50" y1="50" x2="68" y2="22" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+  <!-- second hand -->
+  <line x1="50" y1="50" x2="54" y2="75" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
 const counterZip = zipSync({
   'index.html':   strToU8(counterHtml),
   'history.html': strToU8(historyHtml),
   'style.css':    strToU8(counterCss),
   'app.js':       strToU8(counterJs),
+  'clock.svg':    strToU8(clockSvg),
 });
 
 // ---------------------------------------------------------------------------
