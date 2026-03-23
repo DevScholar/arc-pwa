@@ -2,7 +2,7 @@
 
 ⚠️ This project is in Alpha stage and breaking changes may occur.
 
-This project is a modern alternative to the deprecated Web Bundles specification, allowing for users to distribute PWA apps as a compressed file offline.
+ArcPWA (Archivable PWA) is a modern alternative to the deprecated Web Bundles specification, allowing for users to distribute PWA apps as a compressed file offline.
 
 # Browser extension
 
