@@ -47,7 +47,7 @@ export class ArcFS {
     this.files.set(p, bytes);
     // Sync to SW asynchronously (fire-and-forget); local Map is already updated.
     sendToSW({ type: 'WRITE_FILE', instanceId: this.instanceId, path: p, data: bytes }).catch(
-      () => {},
+      (e) => console.warn('[ArcFS] SW sync failed:', e),
     );
   }
 
@@ -65,7 +65,7 @@ export class ArcFS {
     if (!this.files.has(p)) throw enoent(path);
     this.files.delete(p);
     sendToSW({ type: 'WRITE_FILE', instanceId: this.instanceId, path: p, data: null }).catch(
-      () => {},
+      (e) => console.warn('[ArcFS] SW sync failed:', e),
     );
   }
 
@@ -114,19 +114,49 @@ export class ArcFS {
     return this.existsSync(path);
   }
 
-  statSync(path: string): { size: number; isDirectory(): boolean } {
+  statSync(path: string): { size: number; isFile(): boolean; isDirectory(): boolean } {
     const p = normalizePath(path);
     const data = this.files.get(p);
-    if (data) return { size: data.byteLength, isDirectory: () => false };
+    if (data) return { size: data.byteLength, isFile: () => true, isDirectory: () => false };
     const prefix = p.replace(/\/?$/, '/');
     for (const key of this.files.keys()) {
-      if (key.startsWith(prefix)) return { size: 0, isDirectory: () => true };
+      if (key.startsWith(prefix)) return { size: 0, isFile: () => false, isDirectory: () => true };
     }
     throw enoent(path);
   }
 
-  async stat(path: string): Promise<{ size: number; isDirectory(): boolean }> {
+  async stat(path: string): Promise<{ size: number; isFile(): boolean; isDirectory(): boolean }> {
     return this.statSync(path);
+  }
+
+  // --- Rename ---
+
+  renameSync(oldPath: string, newPath: string): void {
+    const op = normalizePath(oldPath);
+    const np = normalizePath(newPath);
+    const data = this.files.get(op);
+    if (!data) throw enoent(oldPath);
+    this.files.delete(op);
+    this.files.set(np, data);
+    sendToSW({ type: 'WRITE_FILE', instanceId: this.instanceId, path: op, data: null }).catch(
+      (e) => console.warn('[ArcFS] SW sync failed:', e),
+    );
+    sendToSW({ type: 'WRITE_FILE', instanceId: this.instanceId, path: np, data }).catch(
+      (e) => console.warn('[ArcFS] SW sync failed:', e),
+    );
+  }
+
+  async rename(oldPath: string, newPath: string): Promise<void> {
+    const op = normalizePath(oldPath);
+    const np = normalizePath(newPath);
+    const data = this.files.get(op);
+    if (!data) throw enoent(oldPath);
+    this.files.delete(op);
+    this.files.set(np, data);
+    await Promise.all([
+      sendToSW({ type: 'WRITE_FILE', instanceId: this.instanceId, path: op, data: null }),
+      sendToSW({ type: 'WRITE_FILE', instanceId: this.instanceId, path: np, data }),
+    ]);
   }
 
   // --- Export ---

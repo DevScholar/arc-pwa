@@ -1,68 +1,65 @@
 # ArcPWA
 
-⚠️ This project is in Pre-Alpha stage. Except breaking changes.
+⚠️ This project is in Alpha stage and breaking changes may occur.
 
-ArcPWA (short for Archivable PWA) runs a PWA directly from a ZIP archive, serving as a modern alternative to Web Bundles. This is a library that allows people to compress PWA into a single ZIP file for offline distribution and viewing in browsers.
+This project is a modern alternative to the deprecated Web Bundles specification, allowing for users to distribute PWA apps as a compressed file offline.
 
-```html
-<arc-pwa archive="my-app.pwa.zip" src="index.html" style="width:100%;height:600px"></arc-pwa>
+# Browser extension
+
+For opening `.pwa.zip` files directly in the browser (without embedding), see [ArcPWA Extension](https://github.com/DevScholar/arc-pwa-ext).
+
+# Usage
+
+## Embedding a PWA in a webpage
+
+## Step 1 — Create a .pwa.zip
+
+Zip the **root** of your built PWA (the folder that contains `index.html`):
+
+```bash
+# e.g. your build output is in dist/
+cd my-app/dist
+zip -r ../my-app.pwa.zip .
 ```
 
-## How it works
+`index.html` must be at the top level of the zip. That's it.
 
-1. The `<arc-pwa>` element fetches and decompresses the ZIP into memory with [fflate](https://github.com/101arrowz/fflate).
-2. A Service Worker is automatically registered. It intercepts requests under a virtual URL prefix and serves files from the in-memory archive.
-3. An `<iframe>` is created pointing at the virtual entry URL. The app runs exactly as it would from a real server — relative imports, CSS, images and all.
-
-Nothing is written to disk or IndexedDB. All file data lives in memory.
-
-## Requirements
-
-- Chrome 80+, Firefox 116+, Safari 16.4+ (ES module Service Worker support)
-- Page must be served over **HTTPS** or **localhost**
-
-## Install
+## Step 2 — Add to your Vite project
 
 ```bash
 npm install @devscholar/arc-pwa
 ```
 
-## Usage
+`index.html`:
 
-**With a bundler (Vite, webpack, etc.):**
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My App</title>
+  <script type="module" src="./main.js"></script>
+</head>
+<body>
+  <arc-pwa archive="my-app.pwa.zip" style="width:100%;height:100vh;display:block"></arc-pwa>
+</body>
+</html>
+```
+
+`main.js`:
 
 ```js
-import '@devscholar/arc-pwa'; // registers <arc-pwa> as a side effect
+import '@devscholar/arc-pwa';
 ```
 
-```html
-<arc-pwa archive="app.pwa.zip" src="index.html" style="width:100%;height:500px"></arc-pwa>
+Put `my-app.pwa.zip` in the same folder as `index.html`. Vite copies `arc-pwa-sw.js` to your output automatically — no extra config needed.
 
-<script type="module">
-  const pwa = document.querySelector('arc-pwa');
-  pwa.addEventListener('load', () => console.log('Running!', pwa.contentWindow));
-  pwa.addEventListener('error', (e) => console.error('Failed:', e.message));
-</script>
-```
+## Requirements
 
-The bundler copies `arc-pwa-sw.js` next to your output automatically via the `new URL(...)` pattern.
+- Chrome 80+, Firefox 116+, Safari 16.4+
+- Page served over **HTTPS** or **localhost** (Not required by the ArcPWA Extension)
 
-**Via CDN (no bundler):**
-
-The Service Worker must be same-origin — download `arc-pwa-sw.js` and host it yourself, then call `configure()` before any element connects:
-
-```html
-<script type="module">
-  import { configure } from 'https://cdn.jsdelivr.net/npm/@devscholar/arc-pwa/dist/arc-pwa.js';
-  configure({ swUrl: '/static/arc-pwa-sw.js' });
-</script>
-```
-
-## Documentation
-
-- [Quick Start](docs/quick-start.md)
-- [Element API — `<arc-pwa>`](docs/element.md)
-- [File System API — `ArcFS`](docs/fs.md)
 
 ## Development
 
@@ -73,29 +70,6 @@ npm run dev                        # Vite dev server → http://localhost:3000/e
 npm run build                      # production build → dist/
 npm run typecheck
 ```
-
-## Architecture
-
-```
-Browser page
-│
-├── <arc-pwa> element
-│   ├── fetches & decompresses .pwa.zip with fflate (in memory)
-│   ├── registers arc-pwa-sw.js as an ES module Service Worker
-│   ├── sends file map to SW via MessageChannel
-│   └── creates <iframe src="/{scope}__arc_pwa__/{instanceId}/index.html">
-│
-└── arc-pwa-sw.js  (Service Worker)
-    ├── intercepts fetch for /{scope}__arc_pwa__/{instanceId}/*
-    ├── looks up file in its in-memory instance map
-    └── returns Response with correct Content-Type
-```
-
-Multiple `<arc-pwa>` elements can run simultaneously — each has its own `instanceId` and isolated file map.
-
-## Browser extension (planned)
-
-See [arc-pwa-ext](https://github.com/DevScholar/arc-pwa-ext) for details.
 
 ## License
 

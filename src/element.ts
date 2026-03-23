@@ -71,6 +71,7 @@ const SHADOW_HTML = /* html */`
 export class ArcPwaElement extends HTMLElement {
   private readonly instanceId: string = crypto.randomUUID();
   private _fs: ArcFS | null = null;
+  private _loading = false;
   private _loadPromise: Promise<void> | null = null;
   private _abortController: AbortController | null = null;
 
@@ -93,8 +94,17 @@ export class ArcPwaElement extends HTMLElement {
     return this._fs;
   }
 
+  get loading(): boolean {
+    return this._loading;
+  }
+
   get contentWindow(): WindowProxy | null {
     return this._iframe.contentWindow;
+  }
+
+  /** Re-fetch and reload the current archive. */
+  reload(): void {
+    this._load();
   }
 
   static get observedAttributes(): string[] {
@@ -135,11 +145,13 @@ export class ArcPwaElement extends HTMLElement {
     this._abortController?.abort();
     this._abortController = new AbortController();
 
+    this._loading = true;
     this._showLoading();
 
     const signal = this._abortController.signal;
     this._loadPromise = this._doLoad(archive, signal);
     this._loadPromise.catch((err: unknown) => {
+      this._loading = false;
       if (isAbortError(err)) return; // cancelled intentionally — no event
       this._showError(String(err));
       this.dispatchEvent(
@@ -155,7 +167,9 @@ export class ArcPwaElement extends HTMLElement {
     await ensureSW();
     if (signal.aborted) return;
 
-    const files = await loadArchive(archive, signal);
+    const files = await loadArchive(archive, signal, (loaded, total) => {
+      this.dispatchEvent(new CustomEvent('progress', { bubbles: true, detail: { loaded, total } }));
+    });
     if (signal.aborted) return;
 
     const entries: [string, Uint8Array][] = [...files.entries()];
@@ -167,6 +181,7 @@ export class ArcPwaElement extends HTMLElement {
     const virtualUrl = `${getArcBase()}${this.instanceId}/${src.replace(/^\/+/, '')}`;
     this._iframe.src = virtualUrl;
 
+    this._loading = false;
     this._showApp();
     this.dispatchEvent(new Event('load', { bubbles: true }));
   }
